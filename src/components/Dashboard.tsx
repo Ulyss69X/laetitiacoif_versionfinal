@@ -16,7 +16,8 @@ import {
   CheckSquare,
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Euro
 } from 'lucide-react';
 
 type Period = 'day' | 'week' | 'month' | 'year';
@@ -113,6 +114,8 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
   const totalRevenue = filteredActivities.reduce((sum, activity) => sum + activity.total_amount, 0);
   const totalServices = filteredActivities.reduce((sum, activity) => sum + activity.total_services, 0);
   const totalProducts = filteredActivities.reduce((sum, activity) => sum + activity.total_products, 0);
+  const uniqueCustomers = new Set(filteredActivities.map(activity => activity.customer_id)).size;
+  const averageRevenuePerCustomer = uniqueCustomers > 0 ? totalRevenue / uniqueCustomers : 0;
 
   // Calculate payment method distribution
   const paymentMethodStats = filteredActivities.reduce((acc, activity) => {
@@ -250,13 +253,21 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">Chiffre d'affaires</h3>
             <TrendingUp className="h-6 w-6 text-pink-600" />
           </div>
           <p className="text-3xl font-bold text-pink-600 mt-2">{totalRevenue.toFixed(2)} €</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Panier moyen</h3>
+            <Euro className="h-6 w-6 text-pink-600" />
+          </div>
+          <p className="text-3xl font-bold text-pink-600 mt-2">{averageRevenuePerCustomer.toFixed(2)} €</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -280,7 +291,7 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
             <h3 className="text-lg font-semibold text-gray-900">Clients</h3>
             <Users className="h-6 w-6 text-pink-600" />
           </div>
-          <p className="text-3xl font-bold text-pink-600 mt-2">{filteredActivities.length}</p>
+          <p className="text-3xl font-bold text-pink-600 mt-2">{uniqueCustomers}</p>
         </div>
       </div>
 
