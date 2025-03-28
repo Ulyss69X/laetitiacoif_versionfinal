@@ -302,9 +302,9 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center mb-2">
               <CreditCard className="h-5 w-5 text-pink-600 mr-2" />
-              <span className="text-sm text-gray-600">Carte bancaire</span>
+              <span className="text-sm text-gray-600">Virements</span>
             </div>
-            <span className="text-lg font-medium">{(paymentMethodStats['carte'] || 0).toFixed(2)} €</span>
+            <span className="text-lg font-medium">{(paymentMethodStats['virement'] || 0).toFixed(2)} €</span>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center mb-2">
@@ -316,7 +316,7 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center mb-2">
               <CheckSquare className="h-5 w-5 text-pink-600 mr-2" />
-              <span className="text-sm text-gray-600">Chèque</span>
+              <span className="text-sm text-gray-600">Chèques</span>
             </div>
             <span className="text-lg font-medium">{(paymentMethodStats['cheque'] || 0).toFixed(2)} €</span>
           </div>

@@ -465,7 +465,7 @@ export function ActivityForm({
               <option value="">Sélectionner un mode de règlement</option>
               <option value="especes">Espèces</option>
               <option value="cheque">Chèque</option>
-              <option value="carte">Carte bancaire</option>
+              <option value="virement">Virement</option>
               <option value="autres">Autres</option>
             </select>
           </div>
