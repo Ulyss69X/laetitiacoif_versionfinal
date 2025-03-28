@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, Plus, Minus, Search, History } from 'lucide-react';
 import type { Activity, ActivityFormData, ActivityService, ActivityProduct, PaymentMethod } from '../types/activity';
 import type { Customer } from '../types/customer';
@@ -48,12 +48,12 @@ export function ActivityForm({
   const [allNotes, setAllNotes] = useState<CustomerNote[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [totalServices, setTotalServices] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  useEffect(() => {
+  // Memoize calculations
+  const calculateTotals = useCallback(() => {
     const servicesTotal = selectedServices.reduce((sum, item) => sum + item.price, 0);
     const productsTotal = selectedProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
@@ -63,16 +63,10 @@ export function ActivityForm({
   }, [selectedServices, selectedProducts]);
 
   useEffect(() => {
-    if (selectedCustomerId) {
-      fetchCustomerNotes(selectedCustomerId);
-      const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
-      if (selectedCustomer) {
-        setCustomerSearch(`${selectedCustomer.last_name} ${selectedCustomer.first_name}`);
-      }
-    }
-  }, [selectedCustomerId]);
+    calculateTotals();
+  }, [calculateTotals]);
 
-  const fetchCustomerNotes = async (customerId: string) => {
+  const fetchCustomerNotes = useCallback(async (customerId: string) => {
     try {
       const { data: notesData, error: notesError } = await supabase
         .from('customer_notes')
@@ -93,54 +87,70 @@ export function ActivityForm({
     } catch (error) {
       console.error('Error fetching notes:', error);
     }
-  };
+  }, []);
 
-  const filteredCustomers = customers.filter(customer => {
+  useEffect(() => {
+    if (selectedCustomerId) {
+      fetchCustomerNotes(selectedCustomerId);
+      const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+      if (selectedCustomer) {
+        setCustomerSearch(`${selectedCustomer.last_name} ${selectedCustomer.first_name}`);
+      }
+    }
+  }, [selectedCustomerId, customers, fetchCustomerNotes]);
+
+  const filteredCustomers = useMemo(() => {
     const searchTerm = customerSearch.toLowerCase();
-    const fullName = `${customer.last_name} ${customer.first_name}`.toLowerCase();
-    return fullName.includes(searchTerm);
-  });
+    return customers.filter(customer => {
+      const fullName = `${customer.last_name} ${customer.first_name}`.toLowerCase();
+      return fullName.includes(searchTerm);
+    });
+  }, [customers, customerSearch]);
 
-  const handleCustomerSelect = (customer: Customer) => {
+  const handleCustomerSelect = useCallback((customer: Customer) => {
     setSelectedCustomerId(customer.id);
     setCustomerSearch(`${customer.last_name} ${customer.first_name}`);
     setShowCustomerList(false);
     fetchCustomerNotes(customer.id);
-  };
+  }, [fetchCustomerNotes]);
 
-  const handleAddService = () => {
-    setSelectedServices([...selectedServices, { service_id: '', price: 0 }]);
-  };
+  const handleAddService = useCallback(() => {
+    setSelectedServices(prev => [...prev, { service_id: '', price: 0 }]);
+  }, []);
 
-  const handleRemoveService = (index: number) => {
-    setSelectedServices(selectedServices.filter((_, i) => i !== index));
-  };
+  const handleRemoveService = useCallback((index: number) => {
+    setSelectedServices(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const handleServiceChange = (index: number, field: keyof ActivityService, value: string | number) => {
-    const updatedServices = [...selectedServices];
-    updatedServices[index] = {
-      ...updatedServices[index],
-      [field]: value,
-    };
-    setSelectedServices(updatedServices);
-  };
+  const handleServiceChange = useCallback((index: number, field: keyof ActivityService, value: string | number) => {
+    setSelectedServices(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return updated;
+    });
+  }, []);
 
-  const handleAddProduct = () => {
-    setSelectedProducts([...selectedProducts, { product_id: '', price: 0, quantity: 1 }]);
-  };
+  const handleAddProduct = useCallback(() => {
+    setSelectedProducts(prev => [...prev, { product_id: '', price: 0, quantity: 1 }]);
+  }, []);
 
-  const handleRemoveProduct = (index: number) => {
-    setSelectedProducts(selectedProducts.filter((_, i) => i !== index));
-  };
+  const handleRemoveProduct = useCallback((index: number) => {
+    setSelectedProducts(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const handleProductChange = (index: number, field: keyof ActivityProduct, value: string | number) => {
-    const updatedProducts = [...selectedProducts];
-    updatedProducts[index] = {
-      ...updatedProducts[index],
-      [field]: value,
-    };
-    setSelectedProducts(updatedProducts);
-  };
+  const handleProductChange = useCallback((index: number, field: keyof ActivityProduct, value: string | number) => {
+    setSelectedProducts(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+      return updated;
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -158,7 +168,6 @@ export function ActivityForm({
         payment_method: formData.get('payment_method') as PaymentMethod,
       };
 
-      // Si un nouveau commentaire est ajouté, l'enregistrer
       if (newNote && selectedCustomerId) {
         const { error: noteError } = await supabase
           .from('customer_notes')
@@ -261,7 +270,6 @@ export function ActivityForm({
             </div>
           </div>
 
-          {/* Commentaires client */}
           {selectedCustomerId && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
@@ -299,7 +307,6 @@ export function ActivityForm({
             </div>
           )}
 
-          {/* Services */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">Prestations</h3>
@@ -314,7 +321,7 @@ export function ActivityForm({
             </div>
 
             {selectedServices.map((service, index) => (
-              <div key={index} className="grid grid-cols-3 gap-4 items-end">
+              <div key={`service-${index}`} className="grid grid-cols-3 gap-4 items-end">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Prestation
@@ -358,7 +365,6 @@ export function ActivityForm({
             ))}
           </div>
 
-          {/* Products */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">Produits</h3>
@@ -373,7 +379,7 @@ export function ActivityForm({
             </div>
 
             {selectedProducts.map((product, index) => (
-              <div key={index} className="grid grid-cols-4 gap-4 items-end">
+              <div key={`product-${index}`} className="grid grid-cols-4 gap-4 items-end">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Produit
@@ -430,7 +436,6 @@ export function ActivityForm({
             ))}
           </div>
 
-          {/* Totals */}
           <div className="bg-gray-50 p-4 rounded-lg space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
               <span>Total prestations:</span>
