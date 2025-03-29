@@ -259,7 +259,7 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
             <h3 className="text-lg font-semibold text-gray-900">Chiffre d'affaires</h3>
             <TrendingUp className="h-6 w-6 text-pink-600" />
           </div>
-          <p className="text-3xl font-bold text-pink-600 mt-2">{totalRevenue.toFixed(2)} €</p>
+          <p className="text-2xl font-bold text-pink-600 mt-2">{totalRevenue.toFixed(2)} €</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -267,7 +267,7 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
             <h3 className="text-lg font-semibold text-gray-900">Panier moyen</h3>
             <Euro className="h-6 w-6 text-pink-600" />
           </div>
-          <p className="text-3xl font-bold text-pink-600 mt-2">{averageRevenuePerCustomer.toFixed(2)} €</p>
+          <p className="text-2xl font-bold text-pink-600 mt-2">{averageRevenuePerCustomer.toFixed(2)} €</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -275,7 +275,7 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
             <h3 className="text-lg font-semibold text-gray-900">Prestations</h3>
             <Scissors className="h-6 w-6 text-pink-600" />
           </div>
-          <p className="text-3xl font-bold text-pink-600 mt-2">{totalServices.toFixed(2)} €</p>
+          <p className="text-2xl font-bold text-pink-600 mt-2">{totalServices.toFixed(2)} €</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -283,7 +283,7 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
             <h3 className="text-lg font-semibold text-gray-900">Produits</h3>
             <ShoppingBag className="h-6 w-6 text-pink-600" />
           </div>
-          <p className="text-3xl font-bold text-pink-600 mt-2">{totalProducts.toFixed(2)} €</p>
+          <p className="text-2xl font-bold text-pink-600 mt-2">{totalProducts.toFixed(2)} €</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -291,7 +291,7 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
             <h3 className="text-lg font-semibold text-gray-900">Clients</h3>
             <Users className="h-6 w-6 text-pink-600" />
           </div>
-          <p className="text-3xl font-bold text-pink-600 mt-2">{uniqueCustomers}</p>
+          <p className="text-2xl font-bold text-pink-600 mt-2">{uniqueCustomers}</p>
         </div>
       </div>
 
