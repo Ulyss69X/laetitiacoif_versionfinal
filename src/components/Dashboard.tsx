@@ -257,9 +257,9 @@ export function Dashboard({ activities, customers, services, products }: Dashboa
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">Chiffre d'affaires</h3>
-            <TrendingUp className="h-6 w-6 text-pink-300" />
+            <TrendingUp className="h-6 w-6 text-pink-600" />
           </div>
-          <p className="text-3xl font-bold text-pink-300 mt-2">{totalRevenue.toFixed(2)} €</p>
+          <p className="text-3xl font-bold text-pink-600 mt-2">{totalRevenue.toFixed(2)} €</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
