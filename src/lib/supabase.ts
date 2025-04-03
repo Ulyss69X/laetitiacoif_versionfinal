@@ -11,28 +11,24 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    storage: localStorage,
+    storage: window.localStorage,
     detectSessionInUrl: true,
     flowType: 'pkce'
   }
 });
 
 // Handle session errors
-supabase.auth.getSession().then(({ data, error }) => {
-  if (error) {
-    console.error("Error getting session:", error);
-    localStorage.clear();
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+    // Clear local storage and reload on sign out or token refresh failure
+    window.localStorage.clear();
     window.location.reload();
   }
 });
 
-// Handle auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-    // Clear local storage and reload on sign out or token refresh failure
-    if (!session) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  }
+// Initialize auth state
+supabase.auth.getSession().catch(() => {
+  // If getting the session fails, clear storage and reload
+  window.localStorage.clear();
+  window.location.reload();
 });

@@ -52,6 +52,25 @@ export function ActivityForm({
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
 
+  // Reset form when modal is opened/closed
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedServices(initialData?.services || []);
+      setSelectedProducts(initialData?.products || []);
+      setCustomerSearch('');
+      setShowCustomerList(false);
+      setSelectedCustomerId(initialData?.customer_id || '');
+      setNewNote('');
+      setLastNote(null);
+      setAllNotes([]);
+      setIsHistoryOpen(false);
+      setIsSubmitting(false);
+      setTotalServices(0);
+      setTotalProducts(0);
+      setTotalAmount(0);
+    }
+  }, [isOpen, initialData]);
+
   // Memoize calculations
   const calculateTotals = useCallback(() => {
     const servicesTotal = selectedServices.reduce((sum, item) => sum + item.price, 0);
@@ -180,7 +199,17 @@ export function ActivityForm({
       }
 
       await onSubmit(activityData);
+      
+      // Reset form after successful submission
+      setSelectedServices([]);
+      setSelectedProducts([]);
+      setCustomerSearch('');
+      setShowCustomerList(false);
+      setSelectedCustomerId('');
       setNewNote('');
+      setLastNote(null);
+      setAllNotes([]);
+      onClose();
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
