@@ -32,17 +32,11 @@ export function ActivityForm({
   services,
   products,
 }: ActivityFormProps) {
-  if (!isOpen) return null;
-
-  const [selectedServices, setSelectedServices] = useState<ActivityService[]>(
-    initialData?.services || []
-  );
-  const [selectedProducts, setSelectedProducts] = useState<ActivityProduct[]>(
-    initialData?.products || []
-  );
+  const [selectedServices, setSelectedServices] = useState<ActivityService[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<ActivityProduct[]>([]);
   const [customerSearch, setCustomerSearch] = useState('');
   const [showCustomerList, setShowCustomerList] = useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = useState(initialData?.customer_id || '');
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [newNote, setNewNote] = useState('');
   const [lastNote, setLastNote] = useState<CustomerNote | null>(null);
   const [allNotes, setAllNotes] = useState<CustomerNote[]>([]);
@@ -52,24 +46,28 @@ export function ActivityForm({
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  // Reset form when modal is opened/closed
+  const resetForm = useCallback(() => {
+    setSelectedServices(initialData?.services || []);
+    setSelectedProducts(initialData?.products || []);
+    setCustomerSearch('');
+    setShowCustomerList(false);
+    setSelectedCustomerId(initialData?.customer_id || '');
+    setNewNote('');
+    setLastNote(null);
+    setAllNotes([]);
+    setIsHistoryOpen(false);
+    setIsSubmitting(false);
+    setTotalServices(0);
+    setTotalProducts(0);
+    setTotalAmount(0);
+  }, [initialData]);
+
+  // Reset form when modal is opened/closed or initialData changes
   useEffect(() => {
     if (isOpen) {
-      setSelectedServices(initialData?.services || []);
-      setSelectedProducts(initialData?.products || []);
-      setCustomerSearch('');
-      setShowCustomerList(false);
-      setSelectedCustomerId(initialData?.customer_id || '');
-      setNewNote('');
-      setLastNote(null);
-      setAllNotes([]);
-      setIsHistoryOpen(false);
-      setIsSubmitting(false);
-      setTotalServices(0);
-      setTotalProducts(0);
-      setTotalAmount(0);
+      resetForm();
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, resetForm]);
 
   // Memoize calculations
   const calculateTotals = useCallback(() => {
@@ -115,6 +113,10 @@ export function ActivityForm({
       if (selectedCustomer) {
         setCustomerSearch(`${selectedCustomer.last_name} ${selectedCustomer.first_name}`);
       }
+    } else {
+      setLastNote(null);
+      setAllNotes([]);
+      setNewNote('');
     }
   }, [selectedCustomerId, customers, fetchCustomerNotes]);
 
@@ -130,6 +132,7 @@ export function ActivityForm({
     setSelectedCustomerId(customer.id);
     setCustomerSearch(`${customer.last_name} ${customer.first_name}`);
     setShowCustomerList(false);
+    setNewNote('');
     fetchCustomerNotes(customer.id);
   }, [fetchCustomerNotes]);
 
@@ -199,16 +202,7 @@ export function ActivityForm({
       }
 
       await onSubmit(activityData);
-      
-      // Reset form after successful submission
-      setSelectedServices([]);
-      setSelectedProducts([]);
-      setCustomerSearch('');
-      setShowCustomerList(false);
-      setSelectedCustomerId('');
-      setNewNote('');
-      setLastNote(null);
-      setAllNotes([]);
+      resetForm();
       onClose();
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -216,6 +210,8 @@ export function ActivityForm({
       setIsSubmitting(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -226,7 +222,10 @@ export function ActivityForm({
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
             className="text-gray-400 hover:text-gray-500"
             aria-label="Fermer"
           >
@@ -502,7 +501,10 @@ export function ActivityForm({
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                resetForm();
+                onClose();
+              }}
               className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
             >
               Annuler
